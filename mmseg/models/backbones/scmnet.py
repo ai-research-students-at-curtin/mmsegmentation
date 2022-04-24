@@ -6,7 +6,6 @@ from mmcv.runner import BaseModule
 from mmcv.cnn.bricks import Swish
 
 from mmseg.models.decode_heads.psp_head import PPM
-from mmseg.ops import resize
 from ..builder import BACKBONES
 from ..utils import InvertedResidual
 
@@ -75,6 +74,7 @@ class ContextMiningModule(nn.Module):
             #   have a layer for it - so we do it in `forward()`
         ])
 
+
     def forward(self, x):
         size = x.size
         x_pointwise = self.pointwise(x)
@@ -99,91 +99,9 @@ class DeepShallowFeatureFusionModule(nn.Module):
             intermediate_channels=64,
             conv_cfg=None,
             norm_cfg=dict(type='BN'),
-            act_cfg=dict(type='ReLU') # TODO do we need this?
+            act_cfg=dict(type='Swish')
             ):
         super(DeepShallowFeatureFusionModule, self).__init__()
-
-        # self.f1 = ConvModule(
-        #     in_channels=channel_sizes[0],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None) # FIXME assuming none skips activation
-        # self.f2 = ConvModule(
-        #     in_channels=channel_sizes[1],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None), # FIXME assuming none skips activation
-        # self.f3 = ConvModule(
-        #     in_channels=channel_sizes[2],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None), # FIXME assuming none skips activation
-        # self.f4 = ConvModule(
-        #     in_channels=channel_sizes[3],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None), # FIXME assuming none skips activation
-        # self.f5 = ConvModule(
-        #     in_channels=channel_sizes[4],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None), # FIXME assuming none skips activation
-        # self.f6 = ConvModule(
-        #     in_channels=channel_sizes[5],
-        #     out_channels=intermediate_channels,
-        #     kernel_size=(1,1),
-        #     stride=1,
-        #     conv_cfg=conv_cfg,
-        #     norm_cfg=norm_cfg,
-        #     act_cfg=None), # FIXME assuming none skips activation
-
-        # f5_topdown = nn.Sequential([
-        #     build_activation_layer(dict(type='Swish')),
-        #     DepthwiseSeparableConvModule(
-        #         in_channels=intermediate_channels,
-        #         out_channels=intermediate_channels,
-        #         kernel_size=3,
-        #         stride=1)
-        # ])
-        # f4_topdown = nn.Sequential([
-        #     build_activation_layer(dict(type='Swish')),
-        #     DepthwiseSeparableConvModule(
-        #         in_channels=intermediate_channels,
-        #         out_channels=intermediate_channels,
-        #         kernel_size=3,
-        #         stride=1)
-        # ])
-        # f1_topdown = nn.Sequential([
-        #     build_activation_layer(dict(type='Swish')),
-        #     DepthwiseSeparableConvModule(
-        #         in_channels=intermediate_channels,
-        #         out_channels=intermediate_channels,
-        #         kernel_size=3,
-        #         stride=1)
-        # ])
-        # f2_topdown = nn.Sequential([
-        #     build_activation_layer(dict(type='Swish')),
-        #     DepthwiseSeparableConvModule(
-        #         in_channels=intermediate_channels,
-        #         out_channels=intermediate_channels,
-        #         kernel_size=3,
-        #         stride=1)
-        # ])
 
         # Input Stage
         self.inputs = []
@@ -197,32 +115,35 @@ class DeepShallowFeatureFusionModule(nn.Module):
                     conv_cfg=conv_cfg,
                     norm_cfg=norm_cfg,
                     act_cfg=None)
-            )
+                )
 
         self.f6_intermed = nn.Sequential([
-            build_activation_layer(dict(type='Swish')),
+            build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
                 out_channels=intermediate_channels,
                 kernel_size=3,
-                stride=1)
-        ])
+                stride=1,
+                padding=1)
+            ])
         self.f2_intermed_1 = nn.Sequential([
-            build_activation_layer(dict(type='Swish')),
+            build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
                 out_channels=intermediate_channels,
                 kernel_size=3,
-                stride=1)
-        ])  
+                stride=1,
+                padding=1)
+            ])  
         self.f2_intermed_2 = nn.Sequential([
-            build_activation_layer(dict(type='Swish')),
+            build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
                 out_channels=intermediate_channels,
                 kernel_size=3,
-                stride=1)
-        ])  
+                stride=1,
+                padding=1)
+            ])  
 
 
         # Add sets of 3 identical intermediary layers for F3, F4, & F5
@@ -232,30 +153,31 @@ class DeepShallowFeatureFusionModule(nn.Module):
         extended_intermeds = [
             self.f5_intermeds,
             self.f4_intermeds,
-            self.f3_intermeds,
-        ]
+            self.f3_intermeds,]
         
         for intermed in extended_intermeds:
             for ii in range(3):
                 intermed.append(
                     nn.Sequential([
-                        build_activation_layer(dict(type='Swish')),
+                        build_activation_layer(cfg=act_cfg),
                         DepthwiseSeparableConvModule(
                             in_channels=intermediate_channels,
                             out_channels=intermediate_channels,
                             kernel_size=3,
-                            stride=1)
-                        ])
-                    )
+                            stride=1,
+                            padding=1)
+                        ]))
         
         self.out = nn.Sequential([
-            build_activation_layer(dict(type='Swish')),
+            build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
                 out_channels=intermediate_channels,
                 kernel_size=3,
-                stride=1)
-        ])  
+                stride=1,
+                padding=1)
+            ])  
+
 
     def forward(self, f1, f2, f3, f4, f5, f6):
         features = [f1, f2, f3, f4, f5, f6]
@@ -321,11 +243,13 @@ class SCMNet(BaseModule):
         #TODO
     """
     def __init__(self,
-                in_channels,
+                in_channels=3,
+                dsffm_intermed_channels=64,
                 init_cfg=None,
                 conv_cfg=None,
                 norm_cfg=dict(type='BN'),
-                act_cfg=dict(type='ReLU')):
+                act_cfg=dict(type='ReLU'),
+                dsffm_act_cfg=dict(type='Swish')):
 
         super(SCMNet, self).__init__(init_cfg)
 
@@ -352,7 +276,10 @@ class SCMNet(BaseModule):
             in_channels=32,
             out_channels=32,
             stride=2,
-            expand_ratio=1)
+            expand_ratio=1,
+            conv_cfg=self.conv_cfg,
+            norm_cfg=self.norm_cfg,
+            act_cfg=self.act_cfg)
         self.deep_mbconv_2 = InvertedResidual(
             in_channels=32,
             out_channels=48,
@@ -375,19 +302,19 @@ class SCMNet(BaseModule):
             out_channels=32,
             kernel_size=3,
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
-
         self.shallow_dsconv_2 = DepthwiseSeparableConvModule(
             in_channels=32,
             out_channels=48,
             kernel_size=3,
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
-
 
         self.fuse_activation_1 = build_activation_layer(cfg=act_cfg)
         self.cmm_1 = ContextMiningModule(
@@ -402,7 +329,6 @@ class SCMNet(BaseModule):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
-
         self.deep_mbconv_5 = InvertedResidual(
             in_channels=64,
             out_channels=64,
@@ -433,11 +359,11 @@ class SCMNet(BaseModule):
             out_channels=96,
             kernel_size=3,
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
 
-        
         self.fuse_activation_2 = build_activation_layer(cfg=act_cfg)
         self.cmm_2 = ContextMiningModule(
             channels=96)
@@ -480,6 +406,7 @@ class SCMNet(BaseModule):
             out_channels=160,
             kernel_size=3,
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
@@ -492,18 +419,24 @@ class SCMNet(BaseModule):
             kernel_size=(3,3),
             stride=2)
 
-        self.dsffm = DeepShallowFeatureFusionModule()
+        self.dsffm = DeepShallowFeatureFusionModule(
+            intermediate_channels=dsffm_intermed_channels,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=dsffm_act_cfg)
 
         self.out_dsconv_1 = DepthwiseSeparableConvModule(
             in_channels=64,
             out_channels=64,
             kernel_size=3,
-            stride=1)
+            stride=1,
+            padding=1)
         self.out_dsconv_2 = DepthwiseSeparableConvModule(
             in_channels=64,
             out_channels=48,
             kernel_size=3,
-            stride=1)
+            stride=1,
+            padding=1)
         
 
     def forward(self, x):
