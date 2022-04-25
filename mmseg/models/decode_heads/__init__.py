@@ -24,6 +24,7 @@ from .segformer_head import SegformerHead
 from .segmenter_mask_head import SegmenterMaskTransformerHead
 from .sep_aspp_head import DepthwiseSeparableASPPHead
 from .sep_fcn_head import DepthwiseSeparableFCNHead
+from .scmnet_head import SCMNetHead
 from .setr_mla_head import SETRMLAHead
 from .setr_up_head import SETRUPHead
 from .stdc_head import STDCHead

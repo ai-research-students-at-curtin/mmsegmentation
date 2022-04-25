@@ -5,6 +5,7 @@ from .bisenetv2 import BiSeNetV2
 from .cgnet import CGNet
 from .erfnet import ERFNet
 from .fast_scnn import FastSCNN
+from .scmnet import SCMNet
 from .hrnet import HRNet
 from .icnet import ICNet
 from .mit import MixVisionTransformer
