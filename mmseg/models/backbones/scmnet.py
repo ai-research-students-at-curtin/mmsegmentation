@@ -30,21 +30,21 @@ class ContextMiningModule(nn.Module):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg)
         
-        self.dilated_depthwise = ConvModule(
-            in_channels=mid_channels,
-            out_channels=24,
+        self.dilated_depthwise = DepthwiseSeparableConvModule(
+            in_channels=channels,
+            out_channels=mid_channels,
             kernel_size=(3,3),
             stride=1,
             dilation=6,
+            padding='same',
             conv_cfg=conv_cfg,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg)
 
-        self.feature_pool = nn.Sequential([
+        self.feature_pool = nn.Sequential(
             nn.AvgPool2d(
                 kernel_size=(2,2),
-                stride=1,
-                padding='same'),
+                stride=2),
             ConvModule(
                 in_channels=channels,
                 out_channels=mid_channels,
@@ -55,10 +55,10 @@ class ContextMiningModule(nn.Module):
                 act_cfg=act_cfg),
             build_upsample_layer(
                 cfg=dict(type='bilinear'),
-                scale=(2,2))
-        ])
+                scale_factor=(2,2))
+        )
 
-        self.global_pool = nn.Sequential([
+        self.global_pool = nn.Sequential(
             nn.AdaptiveAvgPool2d(
                 output_size=(1,1)
             ),
@@ -72,24 +72,24 @@ class ContextMiningModule(nn.Module):
                 act_cfg=act_cfg),
             # NOTE: Upsampling needs to be done here but we don't 
             #   have a layer for it - so we do it in `forward()`
-        ])
+        )
 
 
     def forward(self, x):
-        size = x.size
+        upsample_shape = (x.size()[-2], x.size()[-1])
         x_pointwise = self.pointwise(x)
         x_dilated_depthwise = self.dilated_depthwise(x)
         x_feature_pool = self.feature_pool(x)
         x_global_pool = self.global_pool(x)
-        x_global_pool = functional.upsample_bilinear(x_global_pool, size)
-
+        x_global_pool = functional.upsample_bilinear(x_global_pool, upsample_shape)
+        
         x_concat = torch.cat((
-            x_pointwise,
-            x_dilated_depthwise,
-            x_feature_pool,
-            x_global_pool,
-        ))
-
+                x_pointwise,
+                x_dilated_depthwise,
+                x_feature_pool,
+                x_global_pool), 
+            dim=1)
+        
         return x_concat
 
 class DeepShallowFeatureFusionModule(nn.Module):
@@ -106,7 +106,7 @@ class DeepShallowFeatureFusionModule(nn.Module):
         # Input Stage
         self.inputs = []
         for ii in range(6):
-            self.stage1.append(
+             self.inputs.append(
                 ConvModule(
                     in_channels=channel_sizes[ii],
                     out_channels=intermediate_channels,
@@ -117,7 +117,7 @@ class DeepShallowFeatureFusionModule(nn.Module):
                     act_cfg=None)
                 )
 
-        self.f6_intermed = nn.Sequential([
+        self.f6_intermed = nn.Sequential(
             build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
@@ -125,8 +125,8 @@ class DeepShallowFeatureFusionModule(nn.Module):
                 kernel_size=3,
                 stride=1,
                 padding=1)
-            ])
-        self.f2_intermed_1 = nn.Sequential([
+            )
+        self.f2_intermed_1 = nn.Sequential(
             build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
@@ -134,8 +134,8 @@ class DeepShallowFeatureFusionModule(nn.Module):
                 kernel_size=3,
                 stride=1,
                 padding=1)
-            ])  
-        self.f2_intermed_2 = nn.Sequential([
+            )  
+        self.f2_intermed_2 = nn.Sequential(
             build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
@@ -143,7 +143,7 @@ class DeepShallowFeatureFusionModule(nn.Module):
                 kernel_size=3,
                 stride=1,
                 padding=1)
-            ])  
+            )  
 
 
         # Add sets of 3 identical intermediary layers for F3, F4, & F5
@@ -158,7 +158,7 @@ class DeepShallowFeatureFusionModule(nn.Module):
         for intermed in extended_intermeds:
             for ii in range(3):
                 intermed.append(
-                    nn.Sequential([
+                    nn.Sequential(
                         build_activation_layer(cfg=act_cfg),
                         DepthwiseSeparableConvModule(
                             in_channels=intermediate_channels,
@@ -166,9 +166,9 @@ class DeepShallowFeatureFusionModule(nn.Module):
                             kernel_size=3,
                             stride=1,
                             padding=1)
-                        ]))
+                        ))
         
-        self.out = nn.Sequential([
+        self.out = nn.Sequential(
             build_activation_layer(cfg=act_cfg),
             DepthwiseSeparableConvModule(
                 in_channels=intermediate_channels,
@@ -176,7 +176,12 @@ class DeepShallowFeatureFusionModule(nn.Module):
                 kernel_size=3,
                 stride=1,
                 padding=1)
-            ])  
+            )
+
+        # Force modules in lists into cuda 
+        all_list_modules = self.inputs + self.f5_intermeds + self.f4_intermeds + self.f3_intermeds
+        for m in all_list_modules:
+            m.cuda()
 
 
     def forward(self, f1, f2, f3, f4, f5, f6):
@@ -195,23 +200,23 @@ class DeepShallowFeatureFusionModule(nn.Module):
         f5_up = functional.interpolate(f5_intermed, scale_factor=2, mode='bilinear')
         f4_intermed = self.f4_intermeds[0](f5_up + f4)
 
-        f1_down = functional.max_pool2d(f1, kernel_size=3, stride=2, padding='same')
+        f1_down = functional.max_pool2d(f1, kernel_size=3, stride=2, padding=1)
         f2_intermed = self.f2_intermed_1(f1_down + f2)
 
-        f2_down = functional.max_pool2d(f2_intermed, kernel_size=3, stride=2, padding='same')
+        f2_down = functional.max_pool2d(f2_intermed, kernel_size=3, stride=2, padding=1)
         f3_intermed = self.f3_intermeds[0](f2_down + f3)
 
         f4_up = functional.interpolate(f4_intermed, scale_factor=2, mode='bilinear')
         f3_intermed = self.f3_intermeds[1](f3_intermed + f4_up)
 
-        f3_down = functional.max_pool2d(f3_intermed, kernel_size=3, stride=2, padding='same')
-        f4_intermed = self.f4_intermeds[1](f3_down, f4_intermed, f4)
+        f3_down = functional.max_pool2d(f3_intermed, kernel_size=3, stride=2, padding=1)
+        f4_intermed = self.f4_intermeds[1](f3_down + f4_intermed + f4)
 
-        f4_down = functional.max_pool2d(f4_intermed, kernel_size=3, stride=2, padding='same')
-        f5_intermed = self.f5_intermeds[1](f4_down, f5_intermed, f5)
+        f4_down = functional.max_pool2d(f4_intermed, kernel_size=3, stride=2, padding=1)
+        f5_intermed = self.f5_intermeds[1](f4_down + f5_intermed + f5)
         
-        f5_down = functional.max_pool2d(f5_intermed, kernel_size=3, stride=2, padding='same')
-        f6_intermed = self.f6_intermed(f5_down, f6)
+        f5_down = functional.max_pool2d(f5_intermed, kernel_size=3, stride=2, padding=1)
+        f6_intermed = self.f6_intermed(f5_down + f6)
 
         f6_up = functional.interpolate(f6_intermed, scale_factor=2, mode='bilinear')
         f5_intermed = self.f5_intermeds[2](f6_up + f5_intermed + f5)
@@ -253,12 +258,18 @@ class SCMNet(BaseModule):
 
         super(SCMNet, self).__init__(init_cfg)
 
+        self.init_cfg = init_cfg
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
+
         # Inputs
         self.deep_in_conv = ConvModule(
             in_channels=in_channels,
             out_channels=32,
             kernel_size=(3,3),
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
@@ -267,6 +278,7 @@ class SCMNet(BaseModule):
             out_channels=24,
             kernel_size=(3,3),
             stride=2,
+            padding=1,
             conv_cfg=self.conv_cfg, 
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
@@ -283,7 +295,7 @@ class SCMNet(BaseModule):
         self.deep_mbconv_2 = InvertedResidual(
             in_channels=32,
             out_channels=48,
-            stride=1,
+            stride=2,
             expand_ratio=6,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
@@ -379,7 +391,7 @@ class SCMNet(BaseModule):
         self.deep_mbconv_9 = InvertedResidual(
             in_channels=128,
             out_channels=128,
-            stride=2,
+            stride=1,
             expand_ratio=6,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
@@ -387,7 +399,7 @@ class SCMNet(BaseModule):
         self.deep_mbconv_10 = InvertedResidual(
             in_channels=128,
             out_channels=128,
-            stride=2,
+            stride=1,
             expand_ratio=6,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
@@ -395,7 +407,7 @@ class SCMNet(BaseModule):
         self.deep_mbconv_11 = InvertedResidual(
             in_channels=128,
             out_channels=160,
-            stride=2,
+            stride=1,
             expand_ratio=6,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
@@ -417,12 +429,13 @@ class SCMNet(BaseModule):
 
         self.maxpool = nn.MaxPool2d(
             kernel_size=(3,3),
-            stride=2)
+            stride=2,
+            padding=1)
 
         self.dsffm = DeepShallowFeatureFusionModule(
             intermediate_channels=dsffm_intermed_channels,
-            conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
+            conv_cfg=self.conv_cfg,
+            norm_cfg=self.norm_cfg,
             act_cfg=dsffm_act_cfg)
 
         self.out_dsconv_1 = DepthwiseSeparableConvModule(
