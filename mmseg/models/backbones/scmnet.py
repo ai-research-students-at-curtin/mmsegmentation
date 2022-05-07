@@ -437,19 +437,6 @@ class SCMNet(BaseModule):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=dsffm_act_cfg)
-
-        self.out_dsconv_1 = DepthwiseSeparableConvModule(
-            in_channels=64,
-            out_channels=64,
-            kernel_size=3,
-            stride=1,
-            padding=1)
-        self.out_dsconv_2 = DepthwiseSeparableConvModule(
-            in_channels=64,
-            out_channels=48,
-            kernel_size=3,
-            stride=1,
-            padding=1)
         
 
     def forward(self, x):
@@ -498,8 +485,10 @@ class SCMNet(BaseModule):
             x_cmm_2, 
             x_cmm_3, 
             x_maxpool)
-        
-        x = self.out_dsconv_1(x)
-        x = self.out_dsconv_2(x)
+
+        # x = self.out_dsconv_1(x)
+        # x = self.out_dsconv_2(x)
+
+        x = tuple([x])
 
         return x
