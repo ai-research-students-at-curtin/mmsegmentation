@@ -10,6 +10,7 @@ from mmcv.engine import collect_results_cpu, collect_results_gpu
 from mmcv.image import tensor2imgs
 from mmcv.runner import get_dist_info
 
+from datetime import datetime
 
 def np2tmp(array, temp_file_name=None, tmpdir=None):
     """Save ndarray to local numpy file.
@@ -86,9 +87,19 @@ def single_gpu_test(model,
     # we use batch_sampler to get correct data idx
     loader_indices = data_loader.batch_sampler
 
+    # Initialise profiling
+    total_inference_time = 0
+    inferences_done = 0
+
     for batch_indices, data in zip(loader_indices, data_loader):
         with torch.no_grad():
+            # Do profiling
+            start_time = datetime.now()
             result = model(return_loss=False, **data)
+            end_time = datetime.now()
+            # Add time in MS
+            total_inference_time += (end_time - start_time).total_seconds() * 1000
+            inferences_done += 1
 
         if show or out_dir:
             img_tensor = data['img'][0]
@@ -133,6 +144,15 @@ def single_gpu_test(model,
         batch_size = len(result)
         for _ in range(batch_size):
             prog_bar.update()
+
+    print()
+    print('='*50)
+    print("INFERENCE ATTACHMENT RESULTS")
+    print(f"Total Inferences: {inferences_done}")
+    print(f"Total Inference Time: {total_inference_time}ms ({total_inference_time / 1000}s)")
+    print(f"Average Prediction Time: {total_inference_time/inferences_done}ms")
+    print(f"Average FPS: {1000 / (total_inference_time/inferences_done)}")
+    print('='*50)
 
     return results
 
