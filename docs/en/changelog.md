@@ -1,5 +1,189 @@
 ## Changelog
 
+### V0.28.0 (9/8/2022)
+
+**New Features**
+
+- Support Tversky Loss ([#1896](https://github.com/open-mmlab/mmsegmentation/pull/1986))
+
+**Bug Fixes**
+
+- Fix binary segmentation ([#2016](https://github.com/open-mmlab/mmsegmentation/pull/2016))
+- Fix config files ([#1901](https://github.com/open-mmlab/mmsegmentation/pull/1901), [#1893](https://github.com/open-mmlab/mmsegmentation/pull/1893), [#1871](https://github.com/open-mmlab/mmsegmentation/pull/1871))
+- Revise documentation ([#1844](https://github.com/open-mmlab/mmsegmentation/pull/1844), [#1980](https://github.com/open-mmlab/mmsegmentation/pull/1980), [#2025](https://github.com/open-mmlab/mmsegmentation/pull/2025), [#1982](https://github.com/open-mmlab/mmsegmentation/pull/1982))
+- Fix confusion matrix calculation ([#1992](https://github.com/open-mmlab/mmsegmentation/pull/1992))
+- Fix decode head forward_train error ([#1997](https://github.com/open-mmlab/mmsegmentation/pull/1997))
+
+**Contributors**
+
+- @suchot made their first contribution in https://github.com/open-mmlab/mmsegmention/pull/1844
+- @TimoK93 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1992
+
+### V0.27.0 (7/28/2022)
+
+**Enhancement**
+
+- Add Swin-L Transformer models ([#1471](https://github.com/open-mmlab/mmsegmentation/pull/1471))
+- Update ERFNet results ([#1744](https://github.com/open-mmlab/mmsegmentation/pull/1744))
+
+**Bug Fixes**
+
+- Revise documentation ([#1761](https://github.com/open-mmlab/mmsegmentation/pull/1761), [#1755](https://github.com/open-mmlab/mmsegmentation/pull/1755), [#1802](https://github.com/open-mmlab/mmsegmentation/pull/1802))
+- Fix colab tutorial ([#1779](https://github.com/open-mmlab/mmsegmentation/pull/1779))
+- Fix segformer checkpoint url ([#1785](https://github.com/open-mmlab/mmsegmentation/pull/1785))
+
+**Contributors**
+
+- @DataSttructure made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1802
+- @AkideLiu made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1785
+- @mawanda-jun made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1761
+- @Yan-Daojiang made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1755
+
+### V0.26.0 (7/1/2022)
+
+**Highlights**
+
+- Update New SegFormer models on ADE20K ([1705](https://github.com/open-mmlab/mmsegmentation/pull/1705))
+- Dedicated MMSegWandbHook for MMSegmentation ([1603](https://github.com/open-mmlab/mmsegmentation/pull/1603))
+
+**New Features**
+
+- Update New SegFormer models on ADE20K ([1705](https://github.com/open-mmlab/mmsegmentation/pull/1705))
+- Dedicated MMSegWandbHook for MMSegmentation ([1603](https://github.com/open-mmlab/mmsegmentation/pull/1603))
+- Add UPerNet r18 results ([1669](https://github.com/open-mmlab/mmsegmentation/pull/1669))
+
+**Enhancement**
+
+- Keep dimension of `cls_token_weight` for easier ONNX deployment ([1642](https://github.com/open-mmlab/mmsegmentation/pull/1642))
+- Support infererence with padding ([1607](https://github.com/open-mmlab/mmsegmentation/pull/1607))
+
+**Bug Fixes**
+
+- Fix typos ([#1640](https://github.com/open-mmlab/mmsegmentation/pull/1640), [#1667](https://github.com/open-mmlab/mmsegmentation/pull/1667), [#1656](https://github.com/open-mmlab/mmsegmentation/pull/1656), [#1699](https://github.com/open-mmlab/mmsegmentation/pull/1699), [#1702](https://github.com/open-mmlab/mmsegmentation/pull/1702), [#1695](https://github.com/open-mmlab/mmsegmentation/pull/1695), [#1707](https://github.com/open-mmlab/mmsegmentation/pull/1707), [#1708](https://github.com/open-mmlab/mmsegmentation/pull/1708), [#1721](https://github.com/open-mmlab/mmsegmentation/pull/1721))
+
+**Documentation**
+
+- Fix `mdformat` version to support python3.6 and remove ruby installation ([1672](https://github.com/open-mmlab/mmsegmentation/pull/1672))
+
+**Contributors**
+
+- @RunningLeon made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1642
+- @zhouzaida made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1655
+- @tkhe made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1667
+- @rotorliu made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1656
+- @EvelynWang-0423 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1679
+- @ZhaoYi1222 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1616
+- @Sanster made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1704
+- @ayulockin made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1603
+
+### V0.25.0 (6/2/2022)
+
+**Highlights**
+
+- Support PyTorch backend on MLU ([1515](https://github.com/open-mmlab/mmsegmentation/pull/1515))
+
+**Bug Fixes**
+
+- Fix the error of BCE loss when batch size is 1 ([1629](https://github.com/open-mmlab/mmsegmentation/pull/1629))
+- Fix bug of `resize` function when align_corners is True ([1592](https://github.com/open-mmlab/mmsegmentation/pull/1592))
+- Fix Dockerfile to run demo script in docker container ([1568](https://github.com/open-mmlab/mmsegmentation/pull/1568))
+- Correct inference_demo.ipynb path ([1576](https://github.com/open-mmlab/mmsegmentation/pull/1576))
+- Fix the `build_segmentor` in colab demo ([1551](https://github.com/open-mmlab/mmsegmentation/pull/1551))
+- Fix md2yml script ([1633](https://github.com/open-mmlab/mmsegmentation/pull/1633), [1555](https://github.com/open-mmlab/mmsegmentation/pull/1555))
+- Fix main line link in MAE README.md ([1556](https://github.com/open-mmlab/mmsegmentation/pull/1556))
+- Fix fastfcn `crop_size` in README.md by ([1597](https://github.com/open-mmlab/mmsegmentation/pull/1597))
+- Pip upgrade when testing windows platform ([1610](https://github.com/open-mmlab/mmsegmentation/pull/1610))
+
+**Improvements**
+
+- Delete DS_Store file ([1549](https://github.com/open-mmlab/mmsegmentation/pull/1549))
+- Revise owners.yml ([1621](https://github.com/open-mmlab/mmsegmentation/pull/1621), [1534](https://github.com/open-mmlab/mmsegmentation/pull/1543))
+
+**Documentation**
+
+- Rewrite the installation guidance ([1630](https://github.com/open-mmlab/mmsegmentation/pull/1630))
+- Format readme ([1635](https://github.com/open-mmlab/mmsegmentation/pull/1635))
+- Replace markdownlint with mdformat to avoid ruby installation ([1591](https://github.com/open-mmlab/mmsegmentation/pull/1591))
+- Add explanation and usage instructions for data configuration ([1548](https://github.com/open-mmlab/mmsegmentation/pull/1548))
+- Configure Myst-parser to parse anchor tag ([1589](https://github.com/open-mmlab/mmsegmentation/pull/1589))
+- Update QR code and link for QQ group ([1598](https://github.com/open-mmlab/mmsegmentation/pull/1598), [1574](https://github.com/open-mmlab/mmsegmentation/pull/1574))
+
+**Contributors**
+
+- @atinfinity made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1568
+- @DoubleChuang made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1576
+- @alpha-baymax made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1515
+- @274869388 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1629
+
+### V0.24.1 (5/1/2022)
+
+**Bug Fixes**
+
+- Fix `LayerDecayOptimizerConstructor` for MAE training ([#1539](https://github.com/open-mmlab/mmsegmentation/pull/1539), [#1540](https://github.com/open-mmlab/mmsegmentation/pull/1540))
+
+### V0.24.0 (4/29/2022)
+
+**Highlights**
+
+- Support MAE: Masked Autoencoders Are Scalable Vision Learners
+- Support Resnet strikes back
+
+**New Features**
+
+- Support MAE: Masked Autoencoders Are Scalable Vision Learners ([1307](https://github.com/open-mmlab/mmsegmentation/pull/1307), [1523](https://github.com/open-mmlab/mmsegmentation/pull/1523))
+- Support Resnet strikes back ([1390](https://github.com/open-mmlab/mmsegmentation/pull/1390))
+- Support extra dataloader settings in configs ([1435](https://github.com/open-mmlab/mmsegmentation/pull/1435))
+
+**Bug Fixes**
+
+- Fix input previous results for the last cascade_decode_head ([#1450](https://github.com/open-mmlab/mmsegmentation/pull/1450))
+- Fix validation loss logging ([#1494](https://github.com/open-mmlab/mmsegmentation/pull/1494))
+- Fix the bug in binary_cross_entropy ([1527](https://github.com/open-mmlab/mmsegmentation/pull/1527))
+- Support single channel prediction for Binary Cross Entropy Loss ([#1454](https://github.com/open-mmlab/mmsegmentation/pull/1454))
+- Fix potential bugs in accuracy.py ([1496](https://github.com/open-mmlab/mmsegmentation/pull/1496))
+- Avoid converting label ids twice by label map during evaluation ([1417](https://github.com/open-mmlab/mmsegmentation/pull/1417))
+- Fix bug about label_map ([1445](https://github.com/open-mmlab/mmsegmentation/pull/1445))
+- Fix image save path bug in Windows ([1423](https://github.com/open-mmlab/mmsegmentation/pull/1423))
+- Fix MMSegmentation Colab demo ([1501](https://github.com/open-mmlab/mmsegmentation/pull/1501), [1452](https://github.com/open-mmlab/mmsegmentation/pull/1452))
+- Migrate azure blob for beit checkpoints ([1503](https://github.com/open-mmlab/mmsegmentation/pull/1503))
+- Fix bug in `tools/analyse_logs.py` caused by wrong plot_iter in some cases ([1428](https://github.com/open-mmlab/mmsegmentation/pull/1428))
+
+**Improvements**
+
+- Merge BEiT and ConvNext's LR decay optimizer constructors ([#1438](https://github.com/open-mmlab/mmsegmentation/pull/1438))
+- Register optimizer constructor with mmseg ([#1456](https://github.com/open-mmlab/mmsegmentation/pull/1456))
+- Refactor transformer encode layer in ViT and BEiT backbone ([#1481](https://github.com/open-mmlab/mmsegmentation/pull/1481))
+- Add `build_pos_embed` and `build_layers` for BEiT ([1517](https://github.com/open-mmlab/mmsegmentation/pull/1517))
+- Add `with_cp` to mit and vit ([1431](https://github.com/open-mmlab/mmsegmentation/pull/1431))
+- Fix inconsistent dtype of `seg_label` in stdc decode ([1463](https://github.com/open-mmlab/mmsegmentation/pull/1463))
+- Delete random seed for training in `dist_train.sh` ([1519](https://github.com/open-mmlab/mmsegmentation/pull/1519))
+- Revise high `workers_per_gpus` in config file ([#1506](https://github.com/open-mmlab/mmsegmentation/pull/1506))
+- Add GPG keys and del mmcv version in Dockerfile ([1534](https://github.com/open-mmlab/mmsegmentation/pull/1534))
+- Update checkpoint for model in deeplabv3plus ([#1487](https://github.com/open-mmlab/mmsegmentation/pull/1487))
+- Add `DistSamplerSeedHook` to set epoch number to dataloader when runner is `EpochBasedRunner` ([1449](https://github.com/open-mmlab/mmsegmentation/pull/1449))
+- Provide URLs of Swin Transformer pretrained models ([1389](https://github.com/open-mmlab/mmsegmentation/pull/1389))
+- Updating Dockerfiles From Docker Directory and `get_started.md` to reach latest stable version of Python, PyTorch and MMCV ([1446](https://github.com/open-mmlab/mmsegmentation/pull/1446))
+
+**Documentation**
+
+- Add more clearly statement of CPU training/inference ([1518](https://github.com/open-mmlab/mmsegmentation/pull/1518))
+
+**Contributors**
+
+- @jiangyitong made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1431
+- @kahkeng made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1447
+- @Nourollah made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1446
+- @androbaza made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1452
+- @Yzichen made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1445
+- @whu-pzhang made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1423
+- @panfeng-hover made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1417
+- @Johnson-Wang made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1496
+- @jere357 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1460
+- @mfernezir made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1494
+- @donglixp made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1503
+- @YuanLiuuuuuu made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1307
+- @Dawn-bin made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1527
+
 ### V0.23.0 (4/1/2022)
 
 **Highlights**
@@ -38,11 +222,11 @@
 
 **Contributors**
 
-* @kinglintianxia made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1371
-* @CCODING04 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1376
-* @mob5566 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1401
-* @xiongnemo made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1392
-* @Xiangxu-0103 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1405
+- @kinglintianxia made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1371
+- @CCODING04 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1376
+- @mob5566 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1401
+- @xiongnemo made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1392
+- @Xiangxu-0103 made their first contribution in https://github.com/open-mmlab/mmsegmentation/pull/1405
 
 ### V0.22.1 (3/9/2022)
 
@@ -53,7 +237,6 @@
 **Improvements**
 
 - Provide URLs of STDC, Segmenter and Twins pretrained models ([#1272](https://github.com/open-mmlab/mmsegmentation/pull/1357))
-
 
 ### V0.22 (3/04/2022)
 

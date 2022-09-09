@@ -58,6 +58,8 @@ class TransformerEncoderLayer(BaseModule):
                  act_cfg=dict(type='GELU'),
                  norm_cfg=dict(type='LN'),
                  batch_first=True,
+                 attn_cfg=dict(),
+                 ffn_cfg=dict(),
                  with_cp=False):
         super(TransformerEncoderLayer, self).__init__()
 
@@ -65,28 +67,38 @@ class TransformerEncoderLayer(BaseModule):
             norm_cfg, embed_dims, postfix=1)
         self.add_module(self.norm1_name, norm1)
 
-        self.attn = MultiheadAttention(
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            attn_drop=attn_drop_rate,
-            proj_drop=drop_rate,
-            dropout_layer=dict(type='DropPath', drop_prob=drop_path_rate),
-            batch_first=batch_first,
-            bias=qkv_bias)
+        attn_cfg.update(
+            dict(
+                embed_dims=embed_dims,
+                num_heads=num_heads,
+                attn_drop=attn_drop_rate,
+                proj_drop=drop_rate,
+                batch_first=batch_first,
+                bias=qkv_bias))
+
+        self.build_attn(attn_cfg)
 
         self.norm2_name, norm2 = build_norm_layer(
             norm_cfg, embed_dims, postfix=2)
         self.add_module(self.norm2_name, norm2)
 
-        self.ffn = FFN(
-            embed_dims=embed_dims,
-            feedforward_channels=feedforward_channels,
-            num_fcs=num_fcs,
-            ffn_drop=drop_rate,
-            dropout_layer=dict(type='DropPath', drop_prob=drop_path_rate),
-            act_cfg=act_cfg)
-
+        ffn_cfg.update(
+            dict(
+                embed_dims=embed_dims,
+                feedforward_channels=feedforward_channels,
+                num_fcs=num_fcs,
+                ffn_drop=drop_rate,
+                dropout_layer=dict(type='DropPath', drop_prob=drop_path_rate)
+                if drop_path_rate > 0 else None,
+                act_cfg=act_cfg))
+        self.build_ffn(ffn_cfg)
         self.with_cp = with_cp
+
+    def build_attn(self, attn_cfg):
+        self.attn = MultiheadAttention(**attn_cfg)
+
+    def build_ffn(self, ffn_cfg):
+        self.ffn = FFN(**ffn_cfg)
 
     @property
     def norm1(self):
@@ -374,13 +386,13 @@ class VisionTransformer(BaseModule):
         """
         assert pos_embed.ndim == 3, 'shape of pos_embed must be [B, L, C]'
         pos_h, pos_w = pos_shape
-        cls_token_weight = pos_embed[:, 0]
+        # keep dim for easy deployment
+        cls_token_weight = pos_embed[:, 0:1]
         pos_embed_weight = pos_embed[:, (-1 * pos_h * pos_w):]
         pos_embed_weight = pos_embed_weight.reshape(
             1, pos_h, pos_w, pos_embed.shape[2]).permute(0, 3, 1, 2)
         pos_embed_weight = resize(
             pos_embed_weight, size=input_shpae, align_corners=False, mode=mode)
-        cls_token_weight = cls_token_weight.unsqueeze(1)
         pos_embed_weight = torch.flatten(pos_embed_weight, 2).transpose(1, 2)
         pos_embed = torch.cat((cls_token_weight, pos_embed_weight), dim=1)
         return pos_embed
